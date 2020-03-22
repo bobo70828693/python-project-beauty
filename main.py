@@ -6,7 +6,7 @@ import random
 
 app = Flask(__name__)
 firebase = FireBaseConnect.initFirebase()
-@app.route("/")
+@app.route("/", methods=['GET'])
 def hello():
     return "Hello World!"
 
@@ -42,4 +42,4 @@ def getWebHook():
             return json.dumps('ok')
     return json.dumps('ok')
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=8000, debug=True)
+    app.run(host="127.0.0.1", port=8080, debug=True)
