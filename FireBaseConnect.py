@@ -27,22 +27,3 @@ def getFirebaseData(firebaseHandle):
     docs = firebaseHandle.collection(path).get()
 
     return docs
-
-# firebase = initFirebase()
-# retrieveData = getFirebaseData(firebase)
-# totalData = []
-# for data in retrieveData:
-#     formatData = data.to_dict()
-#     formatData['title'] = data.id
-#     totalData += [formatData]
-# rndData = random.choice(totalData)
-# imgUrl = random.choice(rndData['images'])
-
-# sendText = rndData['title'] + "\n"
-# if rndData['fbLink'] != '':
-#     sendText += "facebook: " + rndData['fbLink'] + "\n"
-
-# if rndData['insLink'] != '':
-#     sendText += "instagram: " + rndData['insLink'] + "\n"
-
-# sendText += imgUrl

@@ -12,7 +12,7 @@ def hello():
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("xoxb-10539333943-1016858910580-ruzi40HBIUZwW519CC5Re8wU")
+    client = slack.WebClient("xoxb-10539333943-1016858910580-kGCKA1eoZC5VgLN8kO2srtlT")
     requestData = request.get_json()
 
     if requestData['type'] == "url_verification":
@@ -38,7 +38,7 @@ def getWebHook():
 
             sendText += imgUrl
             
-            client.chat_postMessage(channel="#felixtest", text=sendText)
+            client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
             return json.dumps('ok')
     return json.dumps('ok')
 if __name__ == "__main__":
