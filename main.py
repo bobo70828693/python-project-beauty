@@ -3,6 +3,7 @@ import json
 import slack
 import FireBaseConnect
 import random
+import time
 
 app = Flask(__name__)
 firebase = FireBaseConnect.initFirebase()
@@ -12,34 +13,35 @@ def hello():
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("xoxb-10539333943-1016858910580-kGCKA1eoZC5VgLN8kO2srtlT")
+    client = slack.WebClient("xoxb-10539333943-1016858910580-XK25KZ4UHDLDmVQHEQDh4wyl")
     requestData = request.get_json()
-
+    time.sleep(1.5)
     if requestData['type'] == "url_verification":
         return json.dumps(requestData['challenge'])
 
     if 'event' in requestData:
-        if requestData['event']['text'] == "桑":
-            retrieveData = FireBaseConnect.getFirebaseData(firebase)
-            totalData = []
-            for data in retrieveData:
-                formatData = data.to_dict()
-                formatData['title'] = data.id
-                totalData += [formatData]
-            rndData = random.choice(totalData)
-            imgUrl = random.choice(rndData['images'])
-            
-            sendText = rndData['title'] + "\n"
-            if rndData['fbLink'] != '':
-                sendText += "facebook: " + rndData['fbLink'] + "\n"
+        if 'text' in requestData['event']:
+            if requestData['event']['text'] == "桑":
+                retrieveData = FireBaseConnect.getFirebaseData(firebase)
+                totalData = []
+                for data in retrieveData:
+                    formatData = data.to_dict()
+                    formatData['title'] = data.id
+                    totalData += [formatData]
+                rndData = random.choice(totalData)
+                imgUrl = random.choice(rndData['images'])
+                
+                sendText = rndData['title'] + "\n"
+                if rndData['fbLink'] != '':
+                    sendText += "facebook: " + rndData['fbLink'] + "\n"
 
-            if rndData['insLink'] != '':
-                sendText += "instagram: " + rndData['insLink'] + "\n"
+                if rndData['insLink'] != '':
+                    sendText += "instagram: " + rndData['insLink'] + "\n"
 
-            sendText += imgUrl
-            
-            client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
-            return json.dumps('ok')
+                sendText += imgUrl
+                
+                client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
+                return json.dumps('ok')
     return json.dumps('ok')
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
