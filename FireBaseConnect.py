@@ -1,6 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import db
 import random
 
 def initFirebase():
@@ -8,22 +8,22 @@ def initFirebase():
     cred = credentials.Certificate('./serviceAccount.json')
 
     # init firebase
-    firebase_admin.initialize_app(cred)
-
-    # init firestore
-    firebase = firestore.client()
-
-    return firebase
-
-def addFirebase(firebaseHandle, title, data):
-    docRef = firebaseHandle.collection("beauty").document(title)
-
-    docRef.set(data)
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': "https://python-project-beauty.firebaseio.com/"
+    })
 
     return 'ok'
 
-def getFirebaseData(firebaseHandle):
-    path = 'beauty'
-    docs = firebaseHandle.collection(path).get()
+def addFirebase(data):
+    print(data['title'])
+    ref = db.reference('beauty/')
+    postRef = ref.push()
+    postRef.set(data)
 
-    return docs
+    return 'ok'
+
+def getFirebaseData():
+    ref = db.reference('beauty/')
+    data = ref.get()
+
+    return data

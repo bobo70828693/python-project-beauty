@@ -11,11 +11,11 @@ payLoad = {
 request.post("https://www.ptt.cc/ask/over18?from=%2Fbbs%2FGossiping%2Findex.htmld",payLoad)
 
 domain = "https://www.ptt.cc"
-url = "https://www.ptt.cc/bbs/Beauty/index.html"
+url = "https://www.ptt.cc/bbs/Beauty/index3218.html"
 requestText = request.get(url)
 
 # init firebae
-firebase = FireBaseConnect.initFirebase()
+FireBaseConnect.initFirebase()
 
 exitFlag = 0
 while exitFlag == 0:
@@ -38,7 +38,6 @@ while exitFlag == 0:
         instagram = ""
         facebook = ""
         if oneHref.text[0:4] == "[正妹]":
-            print(oneHref.text)
             innerInfo = request.get(domain + oneHref['href'])
             beautyInfo = BeautifulSoup(innerInfo.text, 'html.parser')
             instagramLink = beautyInfo.find("a", string=re.compile("(instagram)"))
@@ -52,12 +51,17 @@ while exitFlag == 0:
             for image in images:
                 imageList += [image.text]
             
-            data = {
-                "images": imageList,
-                "insLink": instagram,
-                "fbLink": facebook
-            }
+            # 字串處理
+            title = re.sub("[^\u4E00-\u9FFF]", "", oneHref.text.replace("[正妹] ", ""))
 
-            FireBaseConnect.addFirebase(firebase, oneHref.text, data)
+            if len(imageList) != 0 and title != "":
+                data = {
+                    "title": title,
+                    "images": imageList,
+                    "insLink": instagram,
+                    "fbLink": facebook
+                }
+
+                FireBaseConnect.addFirebase(data)
     if nextPageUrl != '':
         requestText = request.get(domain + nextPageUrl)

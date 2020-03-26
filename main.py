@@ -6,14 +6,14 @@ import random
 import time
 
 app = Flask(__name__)
-firebase = FireBaseConnect.initFirebase()
+FireBaseConnect.initFirebase()
 @app.route("/", methods=['GET'])
 def hello():
     return "Hello World!"
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("xoxb-10539333943-1016858910580-XK25KZ4UHDLDmVQHEQDh4wyl")
+    client = slack.WebClient("xoxb-10539333943-1016858910580-CFm3T6PGc0jk9j2TM5xTnnpa")
     requestData = request.get_json()
     time.sleep(1.5)
     if requestData['type'] == "url_verification":
@@ -22,16 +22,15 @@ def getWebHook():
     if 'event' in requestData:
         if 'text' in requestData['event']:
             if requestData['event']['text'] == "桑":
-                retrieveData = FireBaseConnect.getFirebaseData(firebase)
+                retrieveData = FireBaseConnect.getFirebaseData()
                 totalData = []
-                for data in retrieveData:
-                    formatData = data.to_dict()
-                    formatData['title'] = data.id
-                    totalData += [formatData]
+                for hashid, data in retrieveData.items():
+                    data['key'] = hashid
+                    totalData += [data]
                 rndData = random.choice(totalData)
                 imgUrl = random.choice(rndData['images'])
-                
-                sendText = rndData['title'] + "\n"
+
+                sendText = rndData['title'] + rndData['key'] + "\n"
                 if rndData['fbLink'] != '':
                     sendText += "facebook: " + rndData['fbLink'] + "\n"
 
@@ -39,7 +38,7 @@ def getWebHook():
                     sendText += "instagram: " + rndData['insLink'] + "\n"
 
                 sendText += imgUrl
-                
+
                 client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
                 return json.dumps('ok')
     return json.dumps('ok')
