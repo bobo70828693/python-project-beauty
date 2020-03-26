@@ -11,7 +11,7 @@ payLoad = {
 request.post("https://www.ptt.cc/ask/over18?from=%2Fbbs%2FGossiping%2Findex.htmld",payLoad)
 
 domain = "https://www.ptt.cc"
-url = "https://www.ptt.cc/bbs/Beauty/index3218.html"
+url = "https://www.ptt.cc/bbs/Beauty/index.html"
 requestText = request.get(url)
 
 # init firebae
