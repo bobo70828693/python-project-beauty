@@ -4,7 +4,10 @@ import slack
 import FireBaseConnect
 import random
 import time
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 FireBaseConnect.initFirebase()
 @app.route("/", methods=['GET'])
@@ -13,7 +16,8 @@ def hello():
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("")
+    slackApiToken = os.getenv('SLACK_API_TOKEN')
+    client = slack.WebClient(slackApiToken)
     requestData = request.get_json()
     if requestData['type'] == "url_verification":
         return json.dumps(requestData['challenge'])
