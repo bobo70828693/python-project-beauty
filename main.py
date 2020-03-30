@@ -13,7 +13,7 @@ def hello():
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("xoxb-10539333943-1016858910580-nJ5fVNkNExHB0OViPIPRBGxX")
+    client = slack.WebClient("")
     requestData = request.get_json()
     if requestData['type'] == "url_verification":
         return json.dumps(requestData['challenge'])
