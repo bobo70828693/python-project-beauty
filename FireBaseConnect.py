@@ -27,3 +27,7 @@ def getFirebaseData():
     data = ref.get()
 
     return data
+
+def deleteFirebaseData():
+    ref = db.reference('beauty/')
+    ref.delete()

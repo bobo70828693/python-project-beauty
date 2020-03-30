@@ -54,7 +54,7 @@ while exitFlag == 0:
             # 字串處理
             title = re.sub("[^\u4E00-\u9FFF]", "", oneHref.text.replace("[正妹] ", ""))
 
-            if len(imageList) != 0 and title != "":
+            if len(imageList) != 0 and title != "" and (title.find("大尺碼") == -1):
                 data = {
                     "title": title,
                     "images": imageList,

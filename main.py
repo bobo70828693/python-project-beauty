@@ -13,9 +13,8 @@ def hello():
 
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
-    client = slack.WebClient("xoxb-10539333943-1016858910580-CFm3T6PGc0jk9j2TM5xTnnpa")
+    client = slack.WebClient("xoxb-10539333943-1016858910580-nJ5fVNkNExHB0OViPIPRBGxX")
     requestData = request.get_json()
-    time.sleep(1.5)
     if requestData['type'] == "url_verification":
         return json.dumps(requestData['challenge'])
 
@@ -25,12 +24,36 @@ def getWebHook():
                 retrieveData = FireBaseConnect.getFirebaseData()
                 totalData = []
                 for hashid, data in retrieveData.items():
-                    data['key'] = hashid
-                    totalData += [data]
+                    fbLink = ''
+                    insLink = ''
+                    images = []
+                    title = ''
+                    if 'fbLink' in data:
+                        fbLink = data['fbLink']
+
+                    if 'insLink' in data:
+                        insLink = data['insLink']
+                    
+                    if 'images' in data:
+                        images = data['images']
+                    
+                    if 'title' in data:
+                        title = data['title']
+
+
+                    totalData += [
+                        {
+                            "fbLink": fbLink,
+                            "insLink": insLink,
+                            "images": images,
+                            "title": title,
+                            "hashid": hashid
+                        }
+                    ]
                 rndData = random.choice(totalData)
                 imgUrl = random.choice(rndData['images'])
 
-                sendText = rndData['title'] + rndData['key'] + "\n"
+                sendText = rndData['title'] + rndData['hashid'] + "\n"
                 if rndData['fbLink'] != '':
                     sendText += "facebook: " + rndData['fbLink'] + "\n"
 
