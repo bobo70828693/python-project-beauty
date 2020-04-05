@@ -14,9 +14,6 @@ domain = "https://www.ptt.cc"
 url = "https://www.ptt.cc/bbs/Beauty/index.html"
 requestText = request.get(url)
 
-# init firebae
-FireBaseConnect.initFirebase()
-
 exitFlag = 0
 while exitFlag == 0:
 # for page in range(2):

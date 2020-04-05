@@ -14,16 +14,21 @@ def initFirebase():
 
     return 'ok'
 
-def addFirebase(data):
-    print(data['title'])
-    ref = db.reference('beauty/')
+def addFirebase(path, data):
+    ref = db.reference(path)
     postRef = ref.push()
     postRef.set(data)
 
     return 'ok'
 
-def getFirebaseData():
-    ref = db.reference('beauty/')
+def insertData(path, data):
+    ref = db.reference(path)
+    ref.set(data)
+
+    return 'ok'
+
+def getFirebaseData(path):
+    ref = db.reference(path)
     data = ref.get()
 
     return data
@@ -31,3 +36,6 @@ def getFirebaseData():
 def deleteFirebaseData():
     ref = db.reference('beauty/')
     ref.delete()
+
+
+initFirebase()
