@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 import random
+from collections import OrderedDict
 
 def initFirebase():
     # 引用私密金鑰
@@ -24,6 +25,12 @@ def addFirebase(path, data):
 def insertData(path, data):
     ref = db.reference(path)
     ref.set(data)
+
+    return 'ok'
+
+def updateData(path, data):
+    ref = db.reference(path)
+    ref.update(data)
 
     return 'ok'
 

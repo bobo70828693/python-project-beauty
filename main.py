@@ -1,11 +1,14 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, make_response
 import json
 import slack
+from slack.errors import SlackApiError
 import FireBaseConnect
 import random
 import os
 import hashlib
 import re
+import time
+import CrawlerBeauty
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,9 +20,10 @@ def hello():
 @app.route("/webhook", methods=['POST'])
 def getWebHook():
     slackApiToken = os.getenv('SLACK_API_TOKEN')
-    client = slack.WebClient(slackApiToken)
+    slackUserApiToken = os.getenv('SLACKE_USER_API_TOKEN')
+    userClient = slack.WebClient(token=slackUserApiToken, ssl=True)
+    client = slack.WebClient(token=slackApiToken, ssl=True)
     requestData = request.get_json()
-    app.logger.info("Request Body: " + request.get_data(as_text=True))
     if requestData['type'] == "url_verification":
         return json.dumps(requestData['challenge'])
 
@@ -27,64 +31,35 @@ def getWebHook():
         if 'type' in requestData['event']:
             if requestData['event']['type'] == "message":
                 if 'text' in requestData['event']:
-                    if requestData['event']['text'] == "桑":
-                        retrieveData = FireBaseConnect.getFirebaseData('beauty/')
-                        totalData = []
-                        for hashid, data in retrieveData.items():
-                            fbLink = ''
-                            insLink = ''
-                            images = []
-                            title = ''
-                            if 'fbLink' in data:
-                                fbLink = data['fbLink']
-
-                            if 'insLink' in data:
-                                insLink = data['insLink']
-                            
-                            if 'images' in data:
-                                images = data['images']
-                            
-                            if 'title' in data:
-                                title = data['title']
-
-
-                            totalData += [
-                                {
-                                    "fbLink": fbLink,
-                                    "insLink": insLink,
-                                    "images": images,
-                                    "title": title,
-                                    "hashid": hashid
-                                }
-                            ]
-                        rndData = random.choice(totalData)
-                        imgUrl = random.choice(rndData['images'])
-
-                        sendText = rndData['title'] + rndData['hashid'] + "\n"
-                        if rndData['fbLink'] != '':
-                            sendText += "facebook: " + rndData['fbLink'] + "\n"
-
-                        if rndData['insLink'] != '':
-                            sendText += "instagram: " + rndData['insLink'] + "\n"
-
-                        sendText += imgUrl
-
-                        client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
-                        return json.dumps('ok')
-                    elif requestData['event']['text'] == '我桑':
-                        userId = requestData['event']['user']
-                        s = hashlib.sha1()
-                        s.update(userId.encode('utf-8'))
-                        enUserId = s.hexdigest()
-                        path = 'users/{userId}/'.format(userId=enUserId)
-
-                        userLikeList = FireBaseConnect.getFirebaseData(path)
-                        if not userLikeList:
-                            sendText = "沒東西桑個毛"
+                    userInfo = userClient.users_info(user=requestData['event']['user'])
+                    if request.headers.get('X-Slack-Retry-Reason', 0) == 0:
+                        if userInfo['user']['profile']['display_name'] != 'Hoq':
+                            if requestData['event']['text'] == "桑":
+                                app.logger.info("Request Body: " + request.get_data(as_text=True))
+                                sendMessage(client, requestData['event']['channel'])
+                                return make_response("OK", 200)
+                            elif requestData['event']['text'] == '我桑':
+                                userId = requestData['event']['user']
+                                s = hashlib.sha1()
+                                s.update(userId.encode('utf-8'))
+                                enUserId = s.hexdigest()
+                                path = 'users/{userId}/'.format(userId=enUserId)
+                                userLikeList = FireBaseConnect.getFirebaseData(path)
+                                if not userLikeList:
+                                    sendText = "沒東西桑個毛"
+                                else:
+                                    for key in range(len(userLikeList)):
+                                        if key == 5:
+                                            break
+                                        else:
+                                            sendText = random.choice(userLikeList)
+                                            client.api_call("chat.postMessage", json={"channel":requestData['event']['channel'], "text": sendText})
                         else:
-                            sendText = random.choice(userLikeList)
-
-                        client.chat_postMessage(channel=requestData['event']['channel'], text=sendText)
+                            terribleData = FireBaseConnect.getFirebaseData('terrible')
+                            rndTerrible = random.choice(terribleData)
+                            sendText = "給你滿滿的大恬娃，恬娃愛你喔<3\n" + rndTerrible
+                            client.api_call("chat.postMessage", json={"channel":requestData['event']['channel'], "text": sendText})
+                    return make_response("OK", 200, {"X-Slack-No-Retry": 1, "content_type": "application/json"})
             elif requestData['event']['type'] == "reaction_added":
                 if requestData['event']['reaction'] == 'heart':
                     userId = requestData['event']['user']
@@ -134,6 +109,40 @@ def getWebHook():
                             FireBaseConnect.insertData(path, userLikeList)
                     
 
-    return json.dumps('ok')
+    return make_response("OK", 200, {"X-Slack-No-Retry": 1})
+
+@app.route("/crawlerBeauty", methods=['GET'])
+def crawlerBeauty():
+    CrawlerBeauty.CrawlerData()
+
+def sendMessage(client, channel):
+    retrieveData = FireBaseConnect.getFirebaseData('beauty/')
+    totalData = []
+    for hashid, data in retrieveData.items():
+        totalData += [{
+                'fbLink': data.get('fbLink', ''), 
+                'insLink': data.get('insLink', ''), 
+                'hashid': hashid, 
+                'images': data.get('images', ''),
+                'title': data.get('title', '')}]
+
+    rndData = random.choice(totalData)
+    loop = 0
+    sendText = rndData.get('title', '') + "\n" if rndData.get('title', '') != '' else ''
+    sendText += "facebook: " + rndData.get('fbLink', '') + "\n" if rndData.get('fbLink', '') != '' else ''
+    sendText += "instagram: " + rndData.get('insLink', '') + "\n" if rndData.get('insLink', '') != '' else ''
+    imgLen = len(rndData['images'])
+    for imgUrl in rndData.get('images', []): 
+        if imgLen < 5:
+            sendText += imgUrl
+        else:
+            sendText += random.choice(rndData['images'])
+        
+        if loop == 5:
+            break
+        
+        response = client.api_call("chat.postMessage", json={"channel":channel, "text": sendText})
+        sendText = ''
+        loop+=1
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
