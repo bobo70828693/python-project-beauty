@@ -36,7 +36,10 @@ def getWebHook():
                         if userInfo['user']['profile']['display_name'] != 'Hoq':
                             if requestData['event']['text'] == "桑":
                                 app.logger.info("Request Body: " + request.get_data(as_text=True))
-                                sendMessage(client, requestData['event']['channel'])
+                                sendMessage(client, 'beauty', requestData['event']['channel'])
+                                return make_response("OK", 200)
+                            elif requestData['event']['text'] == '爆桑':
+                                sendMessage(client, 'beautyPlus', requestData['event']['channel'])
                                 return make_response("OK", 200)
                             elif requestData['event']['text'] == '我桑':
                                 userId = requestData['event']['user']
@@ -115,8 +118,8 @@ def getWebHook():
 def crawlerBeauty():
     CrawlerBeauty.CrawlerData()
 
-def sendMessage(client, channel):
-    retrieveData = FireBaseConnect.getFirebaseData('beauty/')
+def sendMessage(client, path, channel):
+    retrieveData = FireBaseConnect.getFirebaseData(path)
     totalData = []
     for hashid, data in retrieveData.items():
         totalData += [{
