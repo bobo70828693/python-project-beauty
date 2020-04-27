@@ -77,8 +77,10 @@ def CrawlerData():
 
                     # 字串處理
                     title = re.sub("[^\u4E00-\u9FFF]", "", oneHref.text.replace("[正妹] ", ""))
+                    if title.find("大尺碼") != -1:
+                       path = 'beautyFat' 
                     print(title, len(pushTag))
-                    if len(imageList) != 0 and title != "" and (title.find("大尺碼") == -1):
+                    if len(imageList) != 0 and title != "":
                         data = {
                             "title": title,
                             "images": imageList,

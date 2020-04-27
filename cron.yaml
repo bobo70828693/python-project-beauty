@@ -1,4 +1,4 @@
 cron:
   - description: "CrawlerBeautyData"
     url: /crawlerBeauty
-    schedule: every monday 06:00
+    schedule: every monday 02:00
